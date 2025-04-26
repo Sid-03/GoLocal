@@ -1,6 +1,6 @@
-# GoLocal & NutripleFoods.com
+# GoLocal
 
-A digital food marketplace suite for organic products, including a B2C e-commerce site (NutripleFoods.com) and a B2B marketplace (GoLocal), developed by ENGIFIT AGRIVENTURE INDIA PRIVATE LIMITED.
+A digital food marketplace suite for organic products, including a B2C e-commerce site and a B2B marketplace (GoLocal).
 
 ## 🚀 Tech Stack
 
@@ -8,7 +8,6 @@ A digital food marketplace suite for organic products, including a B2C e-commerc
 - **Backend:** Java Spring Boot (Microservices)
 - **Database:** PostgreSQL
 - **API Gateway:** Spring Cloud Gateway
-- **Payment:** Razorpay
 - **Containerization:** Docker, Docker Compose
 - **Deployment:** Kubernetes (planned)
 
@@ -71,10 +70,6 @@ go-local-app/
 
 [MIT](LICENSE)
 
-## 📬 Contact
-
-ENGIFIT AGRIVENTURE INDIA PRIVATE LIMITED  
-Email: care@nutriplefoods.com
 
 ---
 
