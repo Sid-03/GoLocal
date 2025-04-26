@@ -1,0 +1,14 @@
+/Users/sidhantsinha/Developer/go-local-app/user-service/src/main/java/com/golocal/userservice/dto/LoginRequest.java
+/Users/sidhantsinha/Developer/go-local-app/user-service/src/main/java/com/golocal/userservice/repository/UserRepository.java
+/Users/sidhantsinha/Developer/go-local-app/user-service/src/main/java/com/golocal/userservice/service/AuthService.java
+/Users/sidhantsinha/Developer/go-local-app/user-service/src/main/java/com/golocal/userservice/dto/RegisterRequest.java
+/Users/sidhantsinha/Developer/go-local-app/user-service/src/main/java/com/golocal/userservice/controller/AuthController.java
+/Users/sidhantsinha/Developer/go-local-app/user-service/src/main/java/com/golocal/userservice/exception/UserAlreadyExistsException.java
+/Users/sidhantsinha/Developer/go-local-app/user-service/src/main/java/com/golocal/userservice/config/CorsConfig.java
+/Users/sidhantsinha/Developer/go-local-app/user-service/src/main/java/com/golocal/userservice/config/SecurityConfig.java
+/Users/sidhantsinha/Developer/go-local-app/user-service/src/main/java/com/golocal/userservice/exception/GlobalExceptionHandler.java
+/Users/sidhantsinha/Developer/go-local-app/user-service/src/main/java/com/golocal/userservice/security/UserDetailsServiceImpl.java
+/Users/sidhantsinha/Developer/go-local-app/user-service/src/main/java/com/golocal/userservice/security/JwtUtil.java
+/Users/sidhantsinha/Developer/go-local-app/user-service/src/main/java/com/golocal/userservice/dto/AuthResponse.java
+/Users/sidhantsinha/Developer/go-local-app/user-service/src/main/java/com/golocal/userservice/entity/User.java
+/Users/sidhantsinha/Developer/go-local-app/user-service/src/main/java/com/golocal/userservice/UserServiceApplication.java

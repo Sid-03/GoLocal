@@ -1,0 +1,150 @@
+version: '3.8'
+
+services:
+  # --- Database Service ---
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      # POSTGRES_DB: postgres # Can explicitly set the default DB if needed by script
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh # <--- ADD THIS LINE
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # --- User Service ---
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: user_service
+    environment:
+      # Database Connection - uses service discovery (postgres-db)
+      DB_HOST: postgres-db
+      DB_PORT: 5432
+      DB_NAME: ${USER_DB_NAME:-user_db} # Specify DB name for this service
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASS: ${POSTGRES_PASSWORD:-password}
+      # JWT Configuration (Must match API Gateway and .env)
+      JWT_SECRET: ${JWT_SECRET} # Loaded from .env
+      JWT_EXPIRATION_MS: 86400000 # 1 day
+      # Spring Boot Profile (optional)
+      # SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      postgres-db: # Wait for the database container to be healthy
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+    # ports: # Not exposed directly, accessed via Gateway
+    #   - "8080:8080"
+
+  # --- Product Service ---
+  product-service:
+    build:
+      context: ./product-service
+      dockerfile: Dockerfile
+    container_name: product_service
+    environment:
+      DB_HOST: postgres-db
+      DB_PORT: 5432
+      DB_NAME: ${PRODUCT_DB_NAME:-product_db}
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASS: ${POSTGRES_PASSWORD:-password}
+      # SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+    # ports: # Not exposed directly
+    #  - "8081:8081"
+
+  # --- Inquiry Service ---
+  inquiry-service:
+    build:
+      context: ./inquiry-service
+      dockerfile: Dockerfile
+    container_name: inquiry_service
+    environment:
+      DB_HOST: postgres-db
+      DB_PORT: 5432
+      DB_NAME: ${INQUIRY_DB_NAME:-inquiry_db}
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASS: ${POSTGRES_PASSWORD:-password}
+      JWT_SECRET: ${JWT_SECRET} # Needed to read headers/principal if necessary
+      # SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+    # ports: # Not exposed directly
+    #   - "8082:8082"
+
+  # --- API Gateway ---
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api_gateway
+    ports:
+      # Expose the gateway to the outside world (or via reverse proxy like Nginx/Traefik)
+      - "9000:9000"
+    environment:
+      # Service Discovery via Docker Compose network (Load Balanced URI)
+      USER_SERVICE_URL: lb://user-service
+      PRODUCT_SERVICE_URL: lb://product-service
+      INQUIRY_SERVICE_URL: lb://inquiry-service
+      # JWT Secret for validation (Must match User Service and .env)
+      JWT_SECRET: ${JWT_SECRET}
+      # SPRING_PROFILES_ACTIVE: docker
+    depends_on: # Ensure backend services start first (logical dependency)
+      - user-service
+      - product-service
+      - inquiry-service
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  # --- Frontend Service ---
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Pass the GATEWAY URL accessible from the user's BROWSER
+        # When running locally via docker-compose, localhost:9000 works
+        REACT_APP_API_GATEWAY_URL: http://localhost:9000/api
+    container_name: frontend_app
+    ports:
+      # Expose the frontend (Nginx) on port 3000
+      - "3000:80"
+    depends_on: # Depends logically on the gateway being available
+      - api-gateway
+    networks:
+      - app-network
+    restart: unless-stopped
+
+# --- Networks Definition ---
+networks:
+  app-network:
+    driver: bridge # Default Docker network driver
+
+# --- Volumes Definition ---
+volumes:
+  postgres_data: # Named volume for persistent PostgreSQL data
+    driver: local

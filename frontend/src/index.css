@@ -1,0 +1,41 @@
+/* Import Tailwind CSS directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Optional: Add base styles or custom utility classes here */
+body {
+  @apply font-sans antialiased text-gray-900 bg-gray-50; /* Base font, smoothing, default text color, light gray bg */
+  margin: 0; /* Remove default body margin */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure the root element and app take up full height */
+html, body, #root, .App {
+  height: 100%;
+}
+
+/* Style links globally if desired */
+/* a {
+  @apply text-green-700 hover:text-green-800 transition-colors duration-200;
+} */
+
+/* Custom scrollbar styling (optional, webkit-based browsers) */
+/* ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #a8a8a8;
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #888;
+} */
+
+/* Add any other global styles or component base styles */

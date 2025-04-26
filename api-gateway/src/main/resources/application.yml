@@ -1,0 +1,73 @@
+# -------------------------------------
+# API Gateway Configuration
+# -------------------------------------
+server:
+  port: 9000 # Port the gateway will listen on
+
+spring:
+  application:
+    name: api-gateway # Service name, useful for logging and potential discovery
+  cloud:
+    gateway:
+      # Service Discovery Integration (using Docker Compose service names)
+      # The 'lb://' prefix tells Gateway to use Spring Cloud LoadBalancer
+      # to resolve the service name (e.g., user-service) to an actual container IP.
+      discovery:
+        locator:
+          enabled: true # Enable finding services if using a discovery client like Eureka/Consul
+          lower-case-service-id: true # Use lowercase service names (e.g., user-service instead of USER-SERVICE)
+
+      # Define Routes for incoming requests
+      routes:
+        # Route for Authentication Service (User Service)
+        - id: user-service-auth-route
+          uri: ${USER_SERVICE_URL:lb://user-service} # Route to user-service container
+          predicates:
+            - Path=/api/auth/** # Match requests starting with /api/auth/
+          # No JWT filter applied here, as these endpoints are public
+
+        # Route for Product Service
+        - id: product-service-route
+          uri: ${PRODUCT_SERVICE_URL:lb://product-service}
+          predicates:
+            - Path=/api/products/** # Match requests for products
+          # No JWT filter needed if products are publicly viewable
+          # filters:
+          #   - name: JwtAuthFilter # Apply filter if reading products requires login
+
+        # Route for Inquiry Service
+        - id: inquiry-service-route
+          uri: ${INQUIRY_SERVICE_URL:lb://inquiry-service}
+          predicates:
+            - Path=/api/inquiries/** # Match requests for inquiries
+
+      # Optional: Default filters applied to all routes
+      # default-filters:
+      #   - AddResponseHeader=X-Gateway-Processed, GoLocal-Gateway-v1
+
+# JWT Configuration (Must match the secret used for signing in user-service)
+jwt:
+  secret: ${JWT_SECRET} # Loaded from environment variable defined in docker-compose.yml
+
+# Logging Configuration (Adjust levels for debugging)
+logging:
+  level:
+    # Root logger level
+    root: INFO
+    # Spring Cloud Gateway specific logging
+    org.springframework.cloud.gateway: INFO # Use DEBUG or TRACE for detailed routing/filter logs
+    # Reactor Netty (underlying HTTP client/server) logging
+    reactor.netty.http.client: INFO
+    reactor.netty.http.server: INFO
+    # Log level for custom filter
+    com.golocal.apigateway.filter: DEBUG # Set to DEBUG to see filter logs
+
+# Actuator endpoint configuration (optional)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus # Expose health, info, prometheus endpoints
+  endpoint:
+    health:
+      show-details: when-authorized # Show details only when authorized
